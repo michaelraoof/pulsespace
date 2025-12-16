@@ -1,11 +1,11 @@
 const baseUrl =
   process.env.NODE_ENV !== "production"
     ? "http://localhost:3000"
-    : "https://pulsespace.onrender.com";
+    : "https://pulsespace-zwfv.onrender.com";
 const baseUrlFE =
   process.env.NODE_ENV !== "production"
     ? "http://localhost:3001"
-    : "https://pulsespace.vercel.app";
+    : "https://pulsespacex.vercel.app";
 
 export default baseUrl;
 export { baseUrlFE };
