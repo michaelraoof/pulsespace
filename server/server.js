@@ -96,6 +96,7 @@ app.use("/api/profile", require("./api/profile"));
 app.use("/api/search", require("./api/search"));
 app.use("/api/chats", require("./api/chats"));
 
+app.use("/", (req, res) => res.status(200).json({ message: "Welcome to PulseSpace" }))
 app.all("*", (req, res) => res.status(404).json({ error: "Not Found" }));
 
 server.listen(PORT, (err) => {
