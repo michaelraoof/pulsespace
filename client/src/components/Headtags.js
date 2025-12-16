@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet";
 const Headtags = () => (
   <>
     <Helmet>
-      <title>Dai3tna</title>
+      <title>PulseSpace</title>
     </Helmet>
   </>
 );

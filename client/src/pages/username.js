@@ -237,9 +237,8 @@ function UserNamePage() {
       <>
         <Header user={user} />
         <div
-          className={` ${
-            !isUserOnOwnAccount ? "min-h-[32.4rem]" : "min-h-[29.3rem]"
-          }  shadow-lg`}
+          className={` ${!isUserOnOwnAccount ? "min-h-[32.4rem]" : "min-h-[29.3rem]"
+            }  shadow-lg`}
           style={{ fontFamily: "Inter", backgroundColor: "white" }}
         >
           <div className="mx-auto max-w-lg sm:max-w-xl md:max-w-3xl lg:max-w-[1000px]">
@@ -386,7 +385,7 @@ function UserNamePage() {
                   }
                   content={
                     isUserOnOwnAccount
-                      ? `Create a new post to start seeing posts here and get your Dai3tna of attention.`
+                      ? `Create a new post to start seeing posts here and get your PulseSpace of attention.`
                       : "This user hasn't made a single post. It looks like they are only interested in viewing other posts and lurking around."
                   }
                 />

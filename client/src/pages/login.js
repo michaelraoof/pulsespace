@@ -67,7 +67,7 @@ function Login() {
           Log In
         </h1>
         <Heading fontSize={"2.6rem"} fontWeight={"600"}>
-          Dai3tna
+          PulseSpace
         </Heading>
         <Subheading fontSize={"1.48rem"}>
           Full Social Media Features Available | End-to-End Encryption Coming
@@ -113,7 +113,7 @@ function Login() {
           ></span>
 
           <BottomText>
-            New to Dai3tna?{" "}
+            New to PulseSpace?{" "}
             <Link to="/signup">
               <BottomAnchor>Create an account.</BottomAnchor>
             </Link>

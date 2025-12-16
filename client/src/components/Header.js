@@ -47,7 +47,7 @@ function Header({ user }) {
               fontSize: "1.8rem",
             }}
           >
-            Dai3tna
+            PulseSpace
           </p>
         </div>
 
@@ -60,7 +60,7 @@ function Header({ user }) {
               fontSize: "1.8rem",
             }}
           >
-            Dai3tna
+            PulseSpace
           </p>
         </div>
 

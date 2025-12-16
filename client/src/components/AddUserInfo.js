@@ -140,7 +140,7 @@ function AddUserInfo({
           Sign Up for your
         </h1>
         <Heading fontSize={"2.6rem"} fontWeight={"600"}>
-          Dai3tna <Subheading fontSize={"1.7rem"}>of attention.</Subheading>
+          PulseSpace <Subheading fontSize={"1.7rem"}>of attention.</Subheading>
         </Heading>
         <CustomInput
           placeholder="Enter Name"

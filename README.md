@@ -1,6 +1,6 @@
-# Dai3tna | Social Media App
+# PulseSpace | Social Media App
 
-Dai3tna is a full-featured social media application built with the MERN stack, featuring real-time chat, interactive social features, and seamless real-time notifications.
+PulseSpace is a full-featured social media application built with the MERN stack, featuring real-time chat, interactive social features, and seamless real-time notifications.
 
 ## Tech Stack
 
@@ -36,6 +36,6 @@ Dai3tna is a full-featured social media application built with the MERN stack, f
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/michaelraoof/dai3tna.git
-   cd dai3tna
+   git clone https://github.com/michaelraoof/pulsespace.git
+   cd pulsespace
    ```
