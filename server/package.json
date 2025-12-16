@@ -17,7 +17,7 @@
     "express": "^4.17.1",
     "js-cookie": "^3.0.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.13.8",
+    "mongoose": "^9.0.1",
     "socket.io": "^4.2.0",
     "uuid": "^8.3.2",
     "validator": "^13.6.0"
