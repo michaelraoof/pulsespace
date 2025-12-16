@@ -11,7 +11,28 @@ const isEmail = require("validator/lib/isEmail");
 const userPng =
   "https://www.kindpng.com/picc/m/24-248253_user-profile-default-image-png-clipart-png-download.png"; //default profile pic for the user
 
-const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/; //regex to validate username
+const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/;
+
+router.get("/email/:email", async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    if (!email || email.length < 3) {
+      return res.status(400).send("Invalid email");
+    }
+
+    const user = await UserModel.findOne({ email: email.toLowerCase() });
+
+    if (user) {
+      return res.status(400).send("Email already taken");
+    }
+
+    return res.status(200).send("Available");
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Server Error");
+  }
+});
 
 router.get("/:username", async (req, res) => {
   const { username } = req.params;
