@@ -80,21 +80,21 @@ function Login() {
             value={email}
             onChange={handleChange}
           />
-          <Password marginTop={"1.3rem"}>
-            <PasswordInput
+          <PasswordInputContainer>
+            <Input
               placeholder="Enter Password"
               name="password"
               value={password}
               onChange={handleChange}
               type={visibility ? "text" : "password"}
             />
-            <div
+            <PasswordToggle
               onClick={() => setVisibility((prev) => !prev)}
-              style={{ cursor: "pointer" }}
+              aria-label={visibility ? "Hide password" : "Show password"}
             >
               {visibility ? <Visibility /> : <VisibilityOff />}
-            </div>
-          </Password>
+            </PasswordToggle>
+          </PasswordInputContainer>
 
           {errorMessage !== "" && (
             <ErrorComponent errorMessage={errorMessage} />
@@ -145,8 +145,13 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   background-color: whitesmoke;
+  overflow-x: hidden;
+  
+  @media only screen and (max-width: 600px) {
+    padding-top: 1.5rem;
+  }
 `;
 
 const LoginBox = styled.div`
@@ -161,6 +166,13 @@ const LoginBox = styled.div`
     0 100px 80px rgba(0, 0, 0, 0.12);
 
   min-width: 24rem;
+  max-width: 30.5rem;
+  width: 90%;
+
+  @media only screen and (max-width: 600px) {
+    min-width: auto;
+    width: 95%;
+  }
 `;
 
 const Button = styled.button`
@@ -203,6 +215,30 @@ const BottomText = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const PasswordInputContainer = styled.div`
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const PasswordToggle = styled.div`
+  position: absolute;
+  right: 3rem;
+  top: 64%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8f85de;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #6050dc;
+  }
 `;
 
 const BottomAnchor = styled.p`
