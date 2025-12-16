@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import cookie from "js-cookie";
 import { loginUser } from "utils/authUser";
-import styled from "styled-components";
+
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -55,7 +55,7 @@ function Login() {
 
   return (
     <>
-      <Container>
+      <div className="pt-24 flex flex-col items-center min-h-screen bg-surface-background overflow-x-hidden sm:pt-6">
         <h1
           style={{
             fontSize: "2.8rem",
@@ -73,14 +73,14 @@ function Login() {
           Full Social Media Features Available | End-to-End Encryption Coming
           Soon...
         </Subheading>
-        <LoginBox className="h-[29.25rem] w-[29.5rem]  lg:w-[30.5rem]">
+        <div className="flex flex-col mt-5 bg-surface rounded-card shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),0_6.7px_5.3px_rgba(0,0,0,0.048),0_12.5px_10px_rgba(0,0,0,0.06),0_22.3px_17.9px_rgba(0,0,0,0.072),0_41.8px_33.4px_rgba(0,0,0,0.086),0_100px_80px_rgba(0,0,0,0.12)] min-w-[24rem] max-w-[30.5rem] w-[90%] h-[29.25rem] lg:w-[30.5rem] sm:min-w-auto sm:w-[95%]">
           <Input
             placeholder="Enter Email"
             name="email"
             value={email}
             onChange={handleChange}
           />
-          <PasswordInputContainer>
+          <div className="relative w-full flex flex-col">
             <Input
               placeholder="Enter Password"
               name="password"
@@ -88,22 +88,29 @@ function Login() {
               onChange={handleChange}
               type={visibility ? "text" : "password"}
             />
-            <PasswordToggle
+            <div
+              className="absolute right-12 top-[64%] -translate-y-1/2 cursor-pointer flex items-center justify-center text-text-secondary transition-colors duration-200 hover:text-primary"
               onClick={() => setVisibility((prev) => !prev)}
               aria-label={visibility ? "Hide password" : "Show password"}
             >
               {visibility ? <Visibility /> : <VisibilityOff />}
-            </PasswordToggle>
-          </PasswordInputContainer>
+            </div>
+          </div>
 
           {errorMessage !== "" && (
             <ErrorComponent errorMessage={errorMessage} />
           )}
 
-          <Button disabled={submitDisabled} onClick={handleSubmit}>
+          <button
+            className="transition-all duration-400 cursor-pointer rounded-button bg-primary text-white text-[1.39rem] font-poppins m-[2.2rem_2.2rem_1.5rem_2.2rem] p-[15px] font-medium border-none hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-primary-disabled"
+            disabled={submitDisabled}
+            onClick={handleSubmit}
+          >
             {loading ? <ThreeBounce size={9} color="#fff" /> : "Log In"}
-          </Button>
-          <SmallButton>Forgotten Password?</SmallButton>
+          </button>
+          <p className="cursor-pointer text-center text-text-muted font-roboto text-xl hover:underline">
+            Forgotten Password?
+          </p>
           <span
             style={{
               height: "1.5px",
@@ -112,14 +119,16 @@ function Login() {
             }}
           ></span>
 
-          <BottomText>
+          <span className="text-text-muted text-lg text-center font-roboto mt-8 font-light flex items-center justify-center">
             New to PulseSpace?{" "}
             <Link to="/signup">
-              <BottomAnchor>Create an account.</BottomAnchor>
+              <p className="text-accent hover:underline cursor-pointer">
+                Create an account.
+              </p>
             </Link>
-          </BottomText>
-        </LoginBox>
-      </Container>
+          </span>
+        </div>
+      </div>
     </>
   );
 }
@@ -139,113 +148,3 @@ function AuthHandler() {
   }
 }
 export default AuthHandler;
-
-const Container = styled.div`
-  padding-top: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  background-color: whitesmoke;
-  overflow-x: hidden;
-  
-  @media only screen and (max-width: 600px) {
-    padding-top: 1.5rem;
-  }
-`;
-
-const LoginBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-top: 1.2rem;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.034),
-    0 6.7px 5.3px rgba(0, 0, 0, 0.048), 0 12.5px 10px rgba(0, 0, 0, 0.06),
-    0 22.3px 17.9px rgba(0, 0, 0, 0.072), 0 41.8px 33.4px rgba(0, 0, 0, 0.086),
-    0 100px 80px rgba(0, 0, 0, 0.12);
-
-  min-width: 24rem;
-  max-width: 30.5rem;
-  width: 90%;
-
-  @media only screen and (max-width: 600px) {
-    min-width: auto;
-    width: 95%;
-  }
-`;
-
-const Button = styled.button`
-  transition: all 0.4s;
-  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
-  border-radius: 10px;
-  background-color: ${(props) =>
-    props.backgroundColor ? props.backgroundColor : "#6050dc"};
-  color: white;
-  font-size: 1.39rem;
-  font-family: "Poppins", sans-serif;
-  margin: 2.2rem 2.2rem 1.5rem 2.2rem;
-  padding: 15px;
-  font-weight: 500;
-  border: none;
-
-  :hover {
-    background-color: ${(props) => (props.disabled ? "#a097ea" : "#3e2fb3")};
-  }
-`;
-
-const SmallButton = styled.p`
-  cursor: pointer;
-  text-align: center;
-  color: #b19cd9;
-  font-family: "Roboto", sans-serif;
-  font-size: 1.25rem;
-  :hover {
-    text-decoration: underline;
-  }
-`;
-
-const BottomText = styled.span`
-  color: #b19cd9;
-  font-size: 1.1rem;
-  text-align: center;
-  font-family: "Roboto", sans-serif;
-  margin-top: 2rem;
-  font-weight: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const PasswordInputContainer = styled.div`
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const PasswordToggle = styled.div`
-  position: absolute;
-  right: 3rem;
-  top: 64%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8f85de;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #6050dc;
-  }
-`;
-
-const BottomAnchor = styled.p`
-  color: #ff8af2;
-  :hover {
-    cursor: pointer;
-    color: #ff8af2;
-    text-decoration: underline;
-  }
-`;
