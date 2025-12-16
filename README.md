@@ -39,16 +39,3 @@ Dai3tna is a full-featured social media application built with the MERN stack, f
    git clone https://github.com/michaelraoof/dai3tna.git
    cd dai3tna
    ```
-
-## Authors
-
-- **Mario Samy**  
-  Experienced developer focused on crafting efficient backend systems and seamless integrations.  
-  [GitHub Profile](https://github.com/MarioSAB98)
-- **Michael Raoof**  
-  Full-stack developer passionate about building real-time and scalable web applications.  
-  [GitHub Profile](https://github.com/michaelraoof)
-
----
-
-Developed with ❤️❤️❤️ by Mossad and Mario Samy and Michael Raoof.
