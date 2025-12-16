@@ -9,7 +9,6 @@ import uploadPic from "utils/uploadPic";
 import { submitNewPost } from "../utils/postActions";
 import { ExclamationCircleIcon } from "@heroicons/react/outline";
 import InfoBox from "./HelperComponents/InfoBox";
-import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 
 function InputBox({ user, setPosts, increaseSizeAnim }) {
@@ -66,7 +65,7 @@ function InputBox({ user, setPosts, increaseSizeAnim }) {
     setLoading(false);
   };
 
-  const FormBottomHalf = ({}) => {
+  const FormBottomHalf = ({ }) => {
     return (
       <>
         <span
@@ -107,7 +106,6 @@ function InputBox({ user, setPosts, increaseSizeAnim }) {
                   color="black"
                   height={20}
                   width={20}
-                  timeout={5000} //3 secs
                 />
               </>
             ) : (

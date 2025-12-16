@@ -1,5 +1,5 @@
 import moment from "moment";
-import Moment from "react-moment";
+
 
 const calculateTime = (createdAt, isComment) => {
   const today = moment(Date.now());
@@ -23,7 +23,7 @@ const calculateTime = (createdAt, isComment) => {
     // return (
     //   <>
     //     {/* hh:mm A -> hours:minutes AM/PM */}
-    //     Today, <Moment format="hh:mm A">{createdAt}</Moment>
+    //     Today, {moment(createdAt).format("hh:mm A")}
     //   </>
     // );
   } else if (diffInHours >= 24 && diffInHours < 36) {
@@ -32,7 +32,7 @@ const calculateTime = (createdAt, isComment) => {
     }
     return (
       <>
-        Yesterday, <Moment format="HH:mm">{createdAt}</Moment>
+        Yesterday, {moment(createdAt).format("HH:mm")}
       </>
     );
   } else if (diffInHours >= 36 && diffInHours < 168) {
@@ -42,7 +42,7 @@ const calculateTime = (createdAt, isComment) => {
     return (
       <>
         {/* date/month/year along with time */}
-        <Moment format="DD MMM YYYY, HH:mm">{createdAt}</Moment>
+        {moment(createdAt).format("DD MMM YYYY, HH:mm")}
       </>
     );
   } else if (diffInHours >= 168) {
@@ -52,7 +52,7 @@ const calculateTime = (createdAt, isComment) => {
     return (
       <>
         {/* date/month/year along with time */}
-        <Moment format="DD MMM YYYY, HH:mm">{createdAt}</Moment>
+        {moment(createdAt).format("DD MMM YYYY, HH:mm")}
       </>
     );
   }

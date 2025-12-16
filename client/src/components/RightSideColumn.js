@@ -97,7 +97,6 @@ function RightSideColumn({ chatsData }) {
                             color="grey"
                             height={15}
                             width={15}
-                            timeout={5000} //3 secs
                           />
                         </div>
                       ) : (

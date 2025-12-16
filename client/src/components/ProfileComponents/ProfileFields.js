@@ -68,7 +68,6 @@ function ProfileFields({ profile, isUserOnOwnAccount, newComp }) {
               color="black"
               height={20}
               width={20}
-              timeout={5000} //3 secs
             />
           ) : (
             <ArrowSmRightIcon
@@ -156,9 +155,9 @@ function ProfileFields({ profile, isUserOnOwnAccount, newComp }) {
             )
           )}
           {social.youtube === "" &&
-          social.facebook === "" &&
-          social.twitter === "" &&
-          social.instagram === "" ? (
+            social.facebook === "" &&
+            social.twitter === "" &&
+            social.instagram === "" ? (
             isUserOnOwnAccount && (
               <AddDiv onClick={() => setEditProfile(true)}>
                 Add Social Media Links
