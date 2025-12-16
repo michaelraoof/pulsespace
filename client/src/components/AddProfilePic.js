@@ -21,6 +21,8 @@ import { registerUser } from "../utils/authUser";
 import ErrorComponent from "./HelperComponents/Error";
 import useBearStore from "store/store";
 import { useNavigate } from "react-router-dom";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+
 function AddProfilePic() {
   const router = useNavigate();
 
@@ -41,11 +43,12 @@ function AddProfilePic() {
   const [mediaPreview, setMediaPreview] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "media") {
-      setMedia(files[0]); //files that we receive from e.target is automatically an array, so we don't need Array.from
+      setMedia(files[0]);
       setMediaPreview(URL.createObjectURL(files[0]));
     } else {
       setOptionalDetails((prev) => ({ ...prev, [name]: value }));
@@ -70,86 +73,103 @@ function AddProfilePic() {
       setLoading,
       router
     );
+
+    // Show success animation before redirect
+    setSuccess(true);
   };
 
   return (
     <>
       <Container>
-        <ImageDiv
-          mediaPreview={mediaPreview}
-          setMediaPreview={setMediaPreview}
-          setMedia={setMedia}
-          inputRef={inputRef}
-          // highlighted={highlighted}
-          // setHighlighted={setHighlighted}
-          handleChange={handleChange}
-        ></ImageDiv>
-        <Bio
-          name="bio"
-          value={bio}
-          onChange={handleChange}
-          placeholder="Enter Bio"
-          rows="3"
-          wrap="soft"
-        />
-        <div
-          style={{
-            maxWidth: "37rem",
-            display: "flex",
+        {success ? (
+          <SuccessContainer>
+            <SuccessIcon>
+              <CheckCircleIcon style={{ fontSize: '5rem', color: '#4caf50' }} />
+            </SuccessIcon>
+            <SuccessText>Account Created Successfully!</SuccessText>
+            <SuccessSubtext>Redirecting you to PulseSpace...</SuccessSubtext>
+          </SuccessContainer>
+        ) : (
+          <>
+            <HeaderContainer>
+              <Heading fontSize={"2.4rem"} fontWeight={"600"}>
+                Customize Your <Subheading fontSize={"1.6rem"}>Profile</Subheading>
+              </Heading>
+              <SubText>Add a photo and tell us about yourself (optional)</SubText>
+            </HeaderContainer>
 
-            flexWrap: "wrap",
-            justifyContent: "center",
-            columnGap: "2rem",
-          }}
-        >
-          <SocialMedia>
-            <YouTubeIcon style={{ color: "#8f85de" }} />
-            <SocialMediaInput
-              name="youtube"
-              value={youtube}
-              onChange={handleChange}
-              placeholder="YouTube"
-            />
-          </SocialMedia>
-          <SocialMedia>
-            <TwitterIcon style={{ color: "#8f85de" }} />
-            <SocialMediaInput
-              name="twitter"
-              value={twitter}
-              onChange={handleChange}
-              placeholder="Twitter"
-            />
-          </SocialMedia>
-          <SocialMedia>
-            <InstagramIcon style={{ color: "#8f85de" }} />
-            <SocialMediaInput
-              name="instagram"
-              value={instagram}
-              onChange={handleChange}
-              placeholder="Instagram"
-            />
-          </SocialMedia>
-          <SocialMedia>
-            <FacebookIcon style={{ color: "#8f85de" }} />
-            <SocialMediaInput
-              name="facebook"
-              value={facebook}
-              onChange={handleChange}
-              placeholder="Facebook"
-            />
-          </SocialMedia>
-        </div>
-        {/* <CreateAccountButton>Create account</CreateAccountButton> */}
-        {errorMessage !== "" && <ErrorComponent errorMessage={errorMessage} />}
-        <ArrowRightDiv onClick={() => submitProfile()}>
-          {loading ? (
-            <Circle size={22} color="white" />
-          ) : (
-            <ArrowForwardRoundedIcon
-              style={{ color: "white", fontSize: "1.8rem" }}
-            />
-          )}
-        </ArrowRightDiv>
+            <ContentContainer>
+              <ImageDiv
+                mediaPreview={mediaPreview}
+                setMediaPreview={setMediaPreview}
+                setMedia={setMedia}
+                inputRef={inputRef}
+                handleChange={handleChange}
+              ></ImageDiv>
+
+              <Bio
+                name="bio"
+                value={bio}
+                onChange={handleChange}
+                placeholder="Tell us about yourself..."
+                rows="3"
+                wrap="soft"
+              />
+
+              <SocialMediaGrid>
+                <SocialMedia>
+                  <YouTubeIcon style={{ color: "#8f85de" }} />
+                  <SocialMediaInput
+                    name="youtube"
+                    value={youtube}
+                    onChange={handleChange}
+                    placeholder="YouTube"
+                  />
+                </SocialMedia>
+                <SocialMedia>
+                  <TwitterIcon style={{ color: "#8f85de" }} />
+                  <SocialMediaInput
+                    name="twitter"
+                    value={twitter}
+                    onChange={handleChange}
+                    placeholder="Twitter"
+                  />
+                </SocialMedia>
+                <SocialMedia>
+                  <InstagramIcon style={{ color: "#8f85de" }} />
+                  <SocialMediaInput
+                    name="instagram"
+                    value={instagram}
+                    onChange={handleChange}
+                    placeholder="Instagram"
+                  />
+                </SocialMedia>
+                <SocialMedia>
+                  <FacebookIcon style={{ color: "#8f85de" }} />
+                  <SocialMediaInput
+                    name="facebook"
+                    value={facebook}
+                    onChange={handleChange}
+                    placeholder="Facebook"
+                  />
+                </SocialMedia>
+              </SocialMediaGrid>
+
+              {errorMessage !== "" && <ErrorComponent errorMessage={errorMessage} />}
+
+              <NextButton onClick={() => submitProfile()} disabled={loading}>
+                {loading ? (
+                  <Circle size={20} color="white" />
+                ) : (
+                  <>
+                    <span>Create Account</span>
+                    <ArrowForwardRoundedIcon style={{ fontSize: "1.5rem" }} />
+                  </>
+                )}
+              </NextButton>
+            </ContentContainer>
+          </>
+        )}
       </Container>
     </>
   );
@@ -160,8 +180,64 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 90vh;
+  min-height: 90vh;
   background-color: whitesmoke;
+  overflow-x: hidden;
+  
+  @media only screen and (max-width: 600px) {
+    padding-top: 2rem;
+  }
+`;
+
+const HeaderContainer = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: fadeInDown 0.6s ease-out;
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const SubText = styled.p`
+  font-size: 1rem;
+  color: #718096;
+  font-family: 'Roboto', sans-serif;
+  margin-top: 0.5rem;
+`;
+
+const ContentContainer = styled.div`
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 2rem;
+  animation: fadeInUp 0.6s ease-out 0.2s;
+  animation-fill-mode: both;
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
+    padding: 0 1rem;
+  }
 `;
 
 const Bio = styled.textarea`
@@ -171,46 +247,42 @@ const Bio = styled.textarea`
   font-weight: 400;
   outline: none;
   padding: 18px;
-  margin: 3.6rem 2.2rem 0 2.2rem;
   border: 1.5px solid #f0e6ff;
   color: black;
   border-radius: 10px;
-  min-width: 37rem;
+  width: 100%;
+  max-width: 37rem;
+  transition: all 0.3s ease;
+  background: white;
 
   @media only screen and (max-width: 600px) {
-    margin-top: 2rem;
-    min-width: 20rem;
+    min-width: auto;
   }
 
   ::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: #8f85de;
-    opacity: 0.46; /* Firefox */
+    opacity: 0.46;
   }
 
   :focus {
-    border: 2px solid #a097ea;
+    border: 1.5px solid #a097ea;
+    box-shadow: 0 4px 12px rgba(160, 151, 234, 0.2);
+    transform: translateY(-2px);
   }
 `;
 
-const ArrowRightDiv = styled.div`
-  cursor: pointer;
-  height: 4rem;
-  width: 4rem;
-  margin-top: 3.8rem;
-  background-color: #6050dc;
-  border-radius: 50%;
+const SocialMediaGrid = styled.div`
   display: grid;
-  place-items: center;
-  transition: all 0.21s ease-in;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 28rem;
+  margin: 1.5rem auto 0;
 
-  :hover {
-    background-color: #3e2fb3;
-    transform: scale(1.04);
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px,
-      rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  @media only screen and (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
   }
-
   @media only screen and (max-width: 320px) {
     margin-top: 1rem;
     height: 3.5rem;
@@ -218,23 +290,93 @@ const ArrowRightDiv = styled.div`
   }
 `;
 
-// const CreateAccountButton = styled.button`
-//   transition: all 0.4s;
-//   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
-//   border-radius: 10px;
-//   background-color: ${(props) =>
-//     props.backgroundColor ? props.backgroundColor : "#6050dc"};
-//   color: white;
-//   font-size: 1.5rem;
-//   font-family: "Poppins", sans-serif;
-//   margin: 5rem 2.2rem 1.5rem 2.2rem;
-//   padding: 18px;
-//   font-weight: 500;
-//   border: none;
+const NextButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.8rem;
+  margin: 2rem auto 0;
+  background: ${props => props.disabled ? '#e0e0e0' : 'linear-gradient(135deg, #6050dc 0%, #8b7ae8 100%)'};
+  color: ${props => props.disabled ? '#9e9e9e' : 'white'};
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.disabled ? 'none' : '0 4px 15px rgba(96, 80, 220, 0.3)'};
+  min-width: 180px;
 
-//   :hover {
-//     background-color: ${(props) => (props.disabled ? "#a097ea" : "#3e2fb3")};
-//   }
-// `;
+  &:hover {
+    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
+    box-shadow: ${props => props.disabled ? 'none' : '0 6px 20px rgba(96, 80, 220, 0.4)'};
+    background: ${props => props.disabled ? '#e0e0e0' : 'linear-gradient(135deg, #3e2fb3 0%, #6050dc 100%)'};
+  }
+
+  &:active {
+    transform: ${props => props.disabled ? 'none' : 'translateY(0)'};
+  }
+
+  @media only screen and (max-width: 600px) {
+    padding: 0.7rem 1.4rem;
+    font-size: 1rem;
+    min-width: 150px;
+  }
+`;
+
+const SuccessContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  animation: successPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  @keyframes successPop {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+`;
+
+const SuccessIcon = styled.div`
+  animation: checkmarkPulse 1s ease-in-out infinite;
+
+  @keyframes checkmarkPulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+`;
+
+const SuccessText = styled.h2`
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2d3748;
+  font-family: 'Poppins', sans-serif;
+  margin-top: 1.5rem;
+  text-align: center;
+`;
+
+const SuccessSubtext = styled.p`
+  font-size: 1.1rem;
+  color: #718096;
+  font-family: 'Roboto', sans-serif;
+  margin-top: 0.5rem;
+  text-align: center;
+`;
 
 export default AddProfilePic;
