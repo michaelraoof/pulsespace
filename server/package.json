@@ -2,7 +2,7 @@
   "name": "pulsespace-server",
   "version": "0.1.0",
   "engines": {
-    "node": "20.8.1"
+    "node": "20.19.0"
   },
   "private": true,
   "scripts": {
