@@ -9,6 +9,7 @@ import cookie from "js-cookie";
 
 function SettingsPage() {
   const user = useBearStore((state) => state.user);
+  const setUser = useBearStore((state) => state.setUser);
   const isAuthenticated = useBearStore((state) => state.isAuthenticated);
 
   // Notification States
@@ -36,6 +37,7 @@ function SettingsPage() {
         headers: { Authorization: cookie.get("token") }
       });
       setPopupSetting(!popupSetting);
+      setUser({ ...user, newMessagePopup: !popupSetting }); // Update store
       toast.success("Notification settings updated!");
     } catch (error) {
       toast.error(catchErrors(error));
