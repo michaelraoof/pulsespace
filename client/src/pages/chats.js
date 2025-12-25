@@ -6,7 +6,7 @@ import baseUrl from "utils/baseUrl";
 import io from "socket.io-client"; //socket.io import
 import Sidebar from "components/Sidebar";
 import ChatSearch from "components/Chat/ChatSearch";
-import { SearchIcon } from "@heroicons/react/outline";
+import { SearchIcon, ArrowLeftIcon, ChatIcon as ChatIconOutline } from "@heroicons/react/outline";
 import styled from "styled-components";
 import calculateTime from "utils/calculateTime";
 import Chat from "components/Chat/Chat";
@@ -248,24 +248,28 @@ function ChatsPage() {
     <div className="bg-gray-100">
       <Header user={user} />
       <main className="flex" style={{ height: "calc(100vh - 4.5rem)" }}>
-        <Sidebar user={user} maxWidth={"250px"} />
-        <div className="flex flex-grow mx-auto h-full w-full max-w-2xl lg:max-w-[65rem] xl:max-w-[70.5rem] bg-white  rounded-lg">
+        <div className="hidden md:block">
+          <Sidebar user={user} maxWidth={"250px"} />
+        </div>
+
+        <div className="flex flex-grow mx-auto h-full w-full max-w-2xl lg:max-w-[65rem] xl:max-w-[70.5rem] bg-white rounded-lg overflow-hidden">
+          {/* List Column */}
           <div
             style={{
               borderLeft: "1px solid lightgrey",
               borderRight: "1px solid lightgrey",
               fontFamily: "Inter",
             }}
-            className="lg:min-w-[27rem] relative pt-4"
+            className={`lg:min-w-[27rem] relative pt-4 w-full md:w-auto h-full flex-col ${searchParams.get("chat") ? "hidden md:flex" : "flex"}`}
           >
             <Title>Chats</Title>
             <div
               onClick={() => setShowChatSearch(true)}
-              className="flex items-center rounded-full bg-gray-100 p-2  m-4 h-12"
+              className="flex items-center rounded-full bg-gray-100 p-2 m-4 h-12"
             >
               <SearchIcon className="h-5 text-gray-600 px-1.5 md:px-0 cursor-pointer" />
               <input
-                className="ml-2 bg-transparent outline-none placeholder-gray-500 w-full font-thin hidden md:flex md:items-center flex-shrink"
+                className="ml-2 bg-transparent outline-none placeholder-gray-500 w-full font-thin flex items-center flex-shrink"
                 type="text"
                 placeholder="Search users"
               />
@@ -279,7 +283,7 @@ function ChatsPage() {
               />
             )}
 
-            <div className="mt-4" style={{ borderTop: "1px solid #efefef" }}>
+            <div className="mt-4 flex-grow overflow-y-auto" style={{ borderTop: "1px solid #efefef" }}>
               <>
                 {chats && chats.length > 0 ? (
                   chats.map((chat) => (
@@ -290,9 +294,9 @@ function ChatsPage() {
                       <div className="relative">
                         <UserImage src={chat.profilePicUrl} alt="userimg" />
                         {connectedUsers.length > 0 &&
-                        connectedUsers.filter(
-                          (user) => user.userId === chat.textsWith
-                        ).length > 0 ? (
+                          connectedUsers.filter(
+                            (user) => user.userId === chat.textsWith
+                          ).length > 0 ? (
                           <FiberManualRecordIcon
                             style={{
                               color: "#55d01d",
@@ -330,99 +334,112 @@ function ChatsPage() {
               </>
             </div>
           </div>
-          {searchParams.get("chat") && (
-            <div
-              style={{
-                minWidth: "27rem",
-                flex: "1",
-                borderRight: "1px solid lightgrey",
-                fontFamily: "Inter",
-                height: "calc(100vh - 4.5rem)",
-              }}
-            >
-              {chatUserData && chatUserData.profilePicUrl ? (
-                <ChatHeaderDiv>
-                  {/* using chatUserData here since it updates itself whenever router.query.chat changes as defined in one of the useEffects above */}
 
-                  <UserImage src={chatUserData.profilePicUrl} alt="userimg" />
-                  <div>
-                    <ChatName>{chatUserData.name}</ChatName>
-
-                    {connectedUsers.length > 0 &&
-                      connectedUsers.filter(
-                        (user) => user.userId === openChatId.current
-                      ).length > 0 && <LastActive>{"Online"}</LastActive>}
-                  </div>
-                </ChatHeaderDiv>
-              ) : (
-                <div
-                  className="max-w-[28rem]"
-                  style={{ padding: "1rem 0.9rem" }}
-                >
-                  <Facebook />
-                </div>
-              )}
-
-              <div
-                className=" flex flex-col justify-between"
-                style={{
-                  height: "calc(100vh - 10.5rem)",
-                }}
-              >
-                <div
-                  className="mt-3 pl-4 pr-4 overflow-y-auto"
-                  style={{ scrollbarWidth: "thin" }}
-                >
-                  <>
-                    {texts.length > 0 ? (
-                      texts.map((text, i) => (
-                        <Chat
-                          key={i}
-                          user={user}
-                          text={text}
-                          setTexts={setTexts}
-                          textsWith={openChatId.current}
-                        />
-                      ))
-                    ) : (
-                      <div></div>
-                    )}
-                    <EndOfMessage ref={endOfMessagesRef} />
-                  </>
-                </div>
-                <div
-                  style={{
-                    borderTop: "1px solid #efefef",
-                    borderBottom: "1px solid #efefef",
-                  }}
-                >
-                  <form
-                    // onClick={() => setShowChatSearch(true)}
-
-                    className="flex items-center rounded-full bg-gray-100 p-4 m-4 max-h-12"
-                  >
-                    <input
-                      className="bg-transparent outline-none placeholder-gray-500 w-full font-thin hidden md:flex md:items-center flex-shrink"
-                      type="text"
-                      value={newText}
-                      onChange={(e) => {
-                        setNewText(e.target.value);
-                      }}
-                      placeholder="Send a new text..."
-                    />
-                    <button
-                      hidden
-                      disabled={!newText}
-                      type="submit"
-                      onClick={(e) => sendText(e, newText)}
+          {/* Chat Window Column */}
+          <div
+            className={`flex-1 flex-col h-full ${!searchParams.get("chat") ? "hidden md:flex" : "flex"}`}
+            style={{
+              borderRight: "1px solid lightgrey",
+              fontFamily: "Inter",
+            }}
+          >
+            {searchParams.get("chat") ? (
+              <>
+                {chatUserData && chatUserData.profilePicUrl ? (
+                  <ChatHeaderDiv>
+                    {/* Back Button for Mobile */}
+                    <div
+                      onClick={() => router("/chats")}
+                      className="md:hidden mr-2 cursor-pointer p-1 rounded-full hover:bg-gray-100"
                     >
-                      Send Message
-                    </button>
-                  </form>
+                      <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
+                    </div>
+
+                    <UserImage src={chatUserData.profilePicUrl} alt="userimg" />
+                    <div>
+                      <ChatName>{chatUserData.name}</ChatName>
+
+                      {connectedUsers.length > 0 &&
+                        connectedUsers.filter(
+                          (user) => user.userId === openChatId.current
+                        ).length > 0 && <LastActive>{"Online"}</LastActive>}
+                    </div>
+                  </ChatHeaderDiv>
+                ) : (
+                  <div
+                    className="max-w-[28rem]"
+                    style={{ padding: "1rem 0.9rem" }}
+                  >
+                    <Facebook />
+                  </div>
+                )}
+
+                <div
+                  className="flex flex-col justify-between flex-grow overflow-hidden"
+                >
+                  <div
+                    className="mt-3 pl-4 pr-4 overflow-y-auto flex-grow"
+                    style={{ scrollbarWidth: "thin" }}
+                  >
+                    <>
+                      {texts.length > 0 ? (
+                        texts.map((text, i) => (
+                          <Chat
+                            key={i}
+                            user={user}
+                            text={text}
+                            setTexts={setTexts}
+                            textsWith={openChatId.current}
+                          />
+                        ))
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-gray-400">
+                          Say hello! 👋
+                        </div>
+                      )}
+                      <EndOfMessage ref={endOfMessagesRef} />
+                    </>
+                  </div>
+                  <div
+                    style={{
+                      borderTop: "1px solid #efefef",
+                      borderBottom: "1px solid #efefef",
+                    }}
+                    className="bg-white"
+                  >
+                    <form
+                      className="flex items-center rounded-full bg-gray-100 p-4 m-4 max-h-12"
+                    >
+                      <input
+                        className="bg-transparent outline-none placeholder-gray-500 w-full font-thin flex items-center flex-shrink"
+                        type="text"
+                        value={newText}
+                        onChange={(e) => {
+                          setNewText(e.target.value);
+                        }}
+                        placeholder="Send a new text..."
+                      />
+                      <button
+                        hidden
+                        disabled={!newText}
+                        type="submit"
+                        onClick={(e) => sendText(e, newText)}
+                      >
+                        Send Message
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="hidden md:flex items-center justify-center h-full text-gray-400 select-none">
+                <div className="text-center">
+                  <ChatIconOutline className="h-20 w-20 mx-auto mb-4 text-gray-300" />
+                  <p className="text-xl">Select a chat to start messaging</p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </main>
     </div>
