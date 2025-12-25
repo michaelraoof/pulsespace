@@ -20,6 +20,16 @@ PulseSpace is a full-featured social media application built with the MERN stack
   - Upload and share images.
 - **Notifications**: Stay updated with real-time notifications for messages and activities.
 
+## Screenshots
+
+| Home Page | Chat |
+|:---:|:---:|
+| ![Home Page](./screenshots/home.png) | ![Chat](./screenshots/chat.png) |
+
+| Profile | Notifications |
+|:---:|:---:|
+| ![Profile](./screenshots/profile.png) | ![Notifications](./screenshots/notification.png) |
+
 ## Future Enhancements
 
 - **End-to-End Encryption**: Implementing robust encryption to ensure secure communication and data privacy.
