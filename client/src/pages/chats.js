@@ -6,7 +6,7 @@ import baseUrl from "utils/baseUrl";
 import io from "socket.io-client"; //socket.io import
 import Sidebar from "components/Sidebar";
 import ChatSearch from "components/Chat/ChatSearch";
-import { SearchIcon, ArrowLeftIcon, ChatIcon as ChatIconOutline } from "@heroicons/react/outline";
+import { SearchIcon, ArrowLeftIcon, ChatIcon as ChatIconOutline, PaperAirplaneIcon } from "@heroicons/react/outline";
 import styled from "styled-components";
 import calculateTime from "utils/calculateTime";
 import Chat from "components/Chat/Chat";
@@ -420,12 +420,12 @@ function ChatsPage() {
                         placeholder="Send a new text..."
                       />
                       <button
-                        hidden
                         disabled={!newText}
                         type="submit"
                         onClick={(e) => sendText(e, newText)}
+                        className={`ml-2 transition-all duration-200 transform ${newText ? 'text-purple-600 hover:scale-110 cursor-pointer' : 'text-gray-300 cursor-default'}`}
                       >
-                        Send Message
+                        <PaperAirplaneIcon className="h-6 w-6 rotate-90" />
                       </button>
                     </form>
                   </div>
