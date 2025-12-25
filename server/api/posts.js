@@ -145,19 +145,19 @@ router.delete("/:postId", authMiddleware, async (req, res) => {
       return res.status(404).send("Post not found");
     }
 
-    const user = UserModel.findById(userId);
+    const user = await UserModel.findById(userId);
 
     //if some user other than logged in user tries to delete a post
     if (post.user._id.toString() !== userId) {
       if (user.role === "root") {
-        await post.remove();
+        await post.deleteOne();
         return res.status(200).send("Post deleted successfully");
       } else {
         return res.status(401).send("Unauthorized");
       }
     }
 
-    await post.remove();
+    await post.deleteOne();
     return res.status(200).send("Post deleted successfully");
   } catch (error) {
     console.log(error);
