@@ -168,6 +168,12 @@ function ChatsPage() {
     if (socket.current && searchParams.get("chat")) {
       loadTexts();
     }
+
+    return () => {
+      if (socket.current) {
+        socket.current.off("textsLoaded");
+      }
+    };
   }, [searchParams.get("chat"), page]);
 
   // Reset page when chat changes

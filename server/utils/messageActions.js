@@ -40,7 +40,23 @@ const loadTexts = async (userId, textsWith, page = 0) => {
         $project: {
           textsWith: "$chat.textsWith",
           texts: {
-            $slice: ["$chat.texts", -((page + 1) * 10), 10],
+            $slice: [
+              "$chat.texts",
+              -((page + 1) * 10),
+              {
+                $cond: {
+                  if: { $lt: [{ $size: "$chat.texts" }, page * 10] },
+                  then: 0,
+                  else: {
+                    $cond: {
+                      if: { $lt: [{ $size: "$chat.texts" }, (page + 1) * 10] },
+                      then: { $subtract: [{ $size: "$chat.texts" }, page * 10] },
+                      else: 10,
+                    },
+                  },
+                },
+              },
+            ],
           },
         },
       },
