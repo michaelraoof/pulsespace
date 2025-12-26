@@ -31,7 +31,12 @@ function Dropdown({ user, showDropdown, setShowDropdown }) {
         boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
       }}
     >
-      <Link to={`/${user.username}`}>
+      <div
+        onClick={() => {
+          setShowDropdown(false);
+          router(`/${user.username}`);
+        }}
+      >
         <ContainerDiv>
           <div>
             <Image
@@ -58,7 +63,7 @@ function Dropdown({ user, showDropdown, setShowDropdown }) {
             </p>
           </div>
         </ContainerDiv>
-      </Link>
+      </div>
       <span
         style={{
           height: "0.65px",
@@ -68,14 +73,19 @@ function Dropdown({ user, showDropdown, setShowDropdown }) {
         }}
       ></span>
 
-      <Link to="/settings">
+      <div
+        onClick={() => {
+          setShowDropdown(false);
+          router("/settings");
+        }}
+      >
         <ButtonDiv>
           <Icondiv>
             <CogIcon style={{ height: "1.5rem" }} />
           </Icondiv>
           <p>Settings</p>
         </ButtonDiv>
-      </Link>
+      </div>
       <ButtonDiv onClick={() => logoutUser(user.email, router)}>
         <Icondiv>
           <LogoutIcon style={{ height: "1.5rem" }} />
