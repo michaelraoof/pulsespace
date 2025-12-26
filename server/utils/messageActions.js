@@ -1,30 +1,58 @@
 const ChatModel = require("../models/ChatModel");
 const UserModel = require("../models/UserModel");
+const mongoose = require("mongoose");
 
-const loadTexts = async (userId, textsWith) => {
+const loadTexts = async (userId, textsWith, page = 0) => {
   try {
-    const chatUser = await ChatModel.findOne({ user: userId }).populate(
-      "chats.textsWith"
+    const user = await ChatModel.findOne({ user: userId });
+
+    const chat = user.chats.find(
+      (chat) => chat.textsWith.toString() === textsWith
     );
-    const chat = chatUser.chats.find(
-      (chat) => chat.textsWith._id.toString() === textsWith
-    );
-    //here, there's no _id after chat.messsagesWith as we haven't populated the data
-    //if we weren't populating, then we would've written chat.messagesWith since _id field wont be there
 
     if (!chat) {
       const textsWithUser = await UserModel.findById(textsWith);
-
       const textsWithDetails = {
         name: textsWithUser.name,
         profilePicUrl: textsWithUser.profilePicUrl,
         id: textsWithUser._id,
       };
-      return {
-        textsWithDetails,
-      };
+      return { textsWithDetails };
     }
-    return { chat };
+
+    const aggregatedChat = await ChatModel.aggregate([
+      { $match: { user: new mongoose.Types.ObjectId(userId) } },
+      {
+        $project: {
+          chat: {
+            $filter: {
+              input: "$chats",
+              as: "chat",
+              cond: {
+                $eq: ["$$chat.textsWith", new mongoose.Types.ObjectId(textsWith)],
+              },
+            },
+          },
+        },
+      },
+      { $unwind: "$chat" },
+      {
+        $project: {
+          textsWith: "$chat.textsWith",
+          texts: {
+            $slice: ["$chat.texts", -((page + 1) * 10), 10],
+          },
+        },
+      },
+    ]);
+
+    const chatData = aggregatedChat[0];
+
+    const talkingTo = await UserModel.findById(chatData.textsWith);
+
+    chatData.textsWith = talkingTo;
+
+    return { chat: chatData };
   } catch (error) {
     console.log(error);
     return { error };

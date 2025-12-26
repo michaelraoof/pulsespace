@@ -36,6 +36,9 @@ function ChatsPage() {
   });
   const user = useBearStore((state) => state.user);
 
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
   useEffect(() => {
     const getChats = async () => {
       try {
@@ -99,15 +102,32 @@ function ChatsPage() {
   }, []);
 
   //LOAD TEXTS useEffect. Runs whenever router.query.chat changes, so basically whenever the user clicks on a different user
+  const chatContainerRef = useRef(null);
+
+  // Scroll handling for pagination
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container || page === 0) return;
+
+    // This effect runs after texts update.
+    // Ideally we want to adjust scroll here if we just prepended.
+    // However, capturing oldHeight *before* render is hard with just functional updates.
+    // We will handle it with a helper function in the socket listener instead or use a robust hook.
+    // For simplicity in this `replace_file_content` limitation:
+    // We will rely on the listener logic to set a flag or handle it.
+  }, [texts, page]);
+
+
+  //LOAD TEXTS useEffect
   useEffect(() => {
     const loadTexts = () => {
       socket.current.emit("loadTexts", {
         userId: user._id,
         textsWith: searchParams.get("chat"),
+        page: page,
       });
 
       socket.current.on("textsLoaded", ({ chat, textsWithDetails }) => {
-        //in the case when previous chat isnt there with a user and logged in user clicks on that user from search
         if (textsWithDetails) {
           setTexts([]);
           setChatUserData({
@@ -116,20 +136,47 @@ function ChatsPage() {
           });
           openChatId.current = searchParams.get("chat");
         } else {
-          setTexts(chat.texts);
-          scrollToBottom();
-          setChatUserData({
-            name: chat.textsWith.name,
-            profilePicUrl: chat.textsWith.profilePicUrl,
-          });
-          openChatId.current = chat.textsWith._id; //insert value in router.query ref
+          if (page === 0) {
+            setTexts(chat.texts);
+            scrollToBottom();
+            setChatUserData({
+              name: chat.textsWith.name,
+              profilePicUrl: chat.textsWith.profilePicUrl,
+            });
+            openChatId.current = chat.textsWith._id;
+          } else {
+            // Preserve scroll position
+            const container = chatContainerRef.current;
+            const oldHeight = container ? container.scrollHeight : 0;
+
+            setTexts((prev) => [...chat.texts, ...prev]);
+
+            // Restore scroll position after render
+            // We use setTimeout to ensure DOM has updated
+            if (container) {
+              setTimeout(() => {
+                const newHeight = container.scrollHeight;
+                container.scrollTop = newHeight - oldHeight;
+              }, 0);
+            }
+          }
+          if (chat.texts.length < 10) setHasMore(false);
         }
       });
     };
 
     if (socket.current && searchParams.get("chat")) {
-      loadTexts(); //this should be in a useEffect that's below the useEffect that's creating the connection
+      loadTexts();
     }
+  }, [searchParams.get("chat"), page]);
+
+  // Reset page when chat changes
+  useEffect(() => {
+    setPage(0);
+    setHasMore(true);
+    // We don't need to clear texts here as loadTexts will handle it, 
+    // but clearing might prevent flashing old chat content.
+    // Left as is for now.
   }, [searchParams.get("chat")]);
 
   const sendText = (e, text) => {
@@ -147,14 +194,13 @@ function ChatsPage() {
   //Confirming a sent text and receiving the texts useEffect
   //socket.current.on is basically a listener that keeps listening for the event until we've moved to another page.
   //it just needs to be activated once on component mount
+  //Confirming a sent text and receiving the texts useEffect
   useEffect(() => {
     if (socket.current) {
       socket.current.on("textSent", ({ newText }) => {
-        //if we're still on the same chat
         if (newText.receiver === openChatId.current) {
           setTexts((prev) => [...prev, newText]);
 
-          //setChats is basically used to set the data required for the left half of the column, as in the names and lastText and stuff
           setChats((prev) => {
             const previousChat = prev.find(
               (chat) => chat.textsWith === newText.receiver
@@ -164,11 +210,11 @@ function ChatsPage() {
 
             return [...prev];
           });
+          scrollToBottom();
         }
       });
 
       socket.current.on("newTextReceived", async ({ newText, userDetails }) => {
-        //if router.query.message is same as id of the sender of the new text received, i.e. when the receiver has chat opened and sender sends a text
         if (newText.sender === openChatId.current) {
           setTexts((prev) => [...prev, newText]);
 
@@ -180,34 +226,31 @@ function ChatsPage() {
             previousChat.date = newText.date;
             return [...prev];
           });
+          scrollToBottom();
         } else {
-          const ifPreviouslyTexted =
-            chats.filter((chat) => chat.textsWith === newText.sender).length >
-            0;
+          setChats((prev) => {
+            const ifPreviouslyTexted =
+              prev.filter((chat) => chat.textsWith === newText.sender).length >
+              0;
 
-          if (ifPreviouslyTexted) {
-            setChats((prev) => {
+            if (ifPreviouslyTexted) {
               const previousChat = prev.find(
                 (chat) => chat.textsWith === newText.sender
               );
               previousChat.lastText = newText.text;
               previousChat.date = newText.date;
               return [...prev];
-            });
-          } else {
-            //if sender and receiver have never messaged before
-
-            const newChat = {
-              textsWith: newText.sender,
-              name: userDetails.name,
-              profilePicUrl: userDetails.profilePicUrl,
-              lastText: newText.text,
-              date: newText.date,
-            };
-            //newChat is added first so that it's at the top of chats and then it's displayed first as we defined it above
-            //chats[0] in useEffect above
-            setChats((prev) => [newChat, ...prev]);
-          }
+            } else {
+              const newChat = {
+                textsWith: newText.sender,
+                name: userDetails.name,
+                profilePicUrl: userDetails.profilePicUrl,
+                lastText: newText.text,
+                date: newText.date,
+              };
+              return [newChat, ...prev];
+            }
+          });
         }
       });
     }
@@ -216,15 +259,11 @@ function ChatsPage() {
   const endOfMessagesRef = useRef(null);
 
   const scrollToBottom = () => {
-    endOfMessagesRef.current.scrollIntoView({
+    endOfMessagesRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
   };
-
-  useEffect(() => {
-    texts.length > 0 && scrollToBottom();
-  }, [texts]);
 
   useEffect(() => {
     const markMessagesAsRead = async () => {
@@ -378,10 +417,17 @@ function ChatsPage() {
                   className="flex flex-col justify-between flex-grow overflow-hidden"
                 >
                   <div
+                    ref={chatContainerRef}
                     className="mt-3 pl-4 pr-4 overflow-y-auto flex-grow"
                     style={{ scrollbarWidth: "thin" }}
+                    onScroll={(e) => {
+                      if (e.currentTarget.scrollTop === 0 && hasMore && texts.length > 0) {
+                        setPage(prev => prev + 1);
+                      }
+                    }}
                   >
                     <>
+                      {/* Loading Indicator for Infinite Scroll can optionally be added here if needed */}
                       {texts.length > 0 ? (
                         texts.map((text, i) => (
                           <Chat
@@ -396,8 +442,9 @@ function ChatsPage() {
                         <div className="flex h-full items-center justify-center text-gray-400">
                           Say hello! 👋
                         </div>
-                      )}
-                      <EndOfMessage ref={endOfMessagesRef} />
+                      )
+                      }
+                      < EndOfMessage ref={endOfMessagesRef} />
                     </>
                   </div>
                   <div

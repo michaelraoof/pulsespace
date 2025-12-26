@@ -51,10 +51,11 @@ io.on("connection", (socket) => {
     }, 10000);
   });
 
-  socket.on("loadTexts", async ({ userId, textsWith }) => {
+  socket.on("loadTexts", async ({ userId, textsWith, page }) => {
     const { chat, error, textsWithDetails } = await loadTexts(
       userId,
-      textsWith
+      textsWith,
+      page
     );
     //loadMessages will either return error or chat
     if (!error) {
