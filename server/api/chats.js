@@ -1,30 +1,39 @@
 const express = require("express");
 const router = express.Router();
-const ChatModel = require("../models/ChatModel");
+const ConversationModel = require("../models/ConversationModel");
+const UserModel = require("../models/UserModel"); // Ensure User model is loaded
 const authMiddleware = require("../middleware/authMiddleware");
-const UserModel = require("../models/UserModel");
-
-//GET ALL CHATS
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const { userId } = req;
-    const user = await ChatModel.findOne({ user: userId }).populate(
-      "chats.textsWith"
-    );
 
-    let chatsToBeSent = [];
-    if (user.chats.length > 0) {
-      chatsToBeSent = await user.chats.map((chat) => ({
-        textsWith: chat.textsWith._id,
-        name: chat.textsWith.name,
-        profilePicUrl: chat.textsWith.profilePicUrl,
-        lastText: chat.texts[chat.texts.length - 1].text,
-        date: chat.texts[chat.texts.length - 1].date,
-        //date of the last message
-      }));
-    }
-    return res.json(chatsToBeSent);
+    const conversations = await ConversationModel.find({
+      users: userId,
+    })
+      .sort({ "lastMessage.date": -1 })
+      .populate("users");
+
+    const chats = conversations.filter(conv => conv.users.length >= 2).map((conv) => {
+      // Find the "other" user
+      const otherUser = conv.users.find(
+        (user) => user._id.toString() !== userId
+      );
+
+      if (!otherUser) return null; // Should not happen if filtered, but safety first
+
+      return {
+        textsWith: otherUser._id,
+        name: otherUser.name,
+        profilePicUrl: otherUser.profilePicUrl,
+        lastText: conv.lastMessage.text,
+        date: conv.lastMessage.date,
+      };
+    }).filter(chat => chat !== null);
+
+    console.log(`Returning ${chats.length} chats for user ${userId}`);
+
+    return res.json(chats);
   } catch (error) {
     console.error(error);
     return res.status(500).send("Server Error");

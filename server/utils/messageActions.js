@@ -1,16 +1,25 @@
-const ChatModel = require("../models/ChatModel");
+const ConversationModel = require("../models/ConversationModel");
+const MessageModel = require("../models/MessageModel");
 const UserModel = require("../models/UserModel");
 const mongoose = require("mongoose");
 
 const loadTexts = async (userId, textsWith, page = 0) => {
   try {
-    const user = await ChatModel.findOne({ user: userId });
+    // Explicitly cast IDs to ensure matching
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const partnerObjectId = new mongoose.Types.ObjectId(textsWith);
 
-    const chat = user.chats.find(
-      (chat) => chat.textsWith.toString() === textsWith
-    );
+    console.log("Loading texts for:", userId, "with", textsWith);
 
-    if (!chat) {
+    // Find Conversation between the two users
+    let conversation = await ConversationModel.findOne({
+      users: { $all: [userObjectId, partnerObjectId] },
+    });
+
+    console.log("Found Conversation:", conversation ? conversation._id : "None");
+
+    if (!conversation) {
+      // No conversation exists yet
       const textsWithUser = await UserModel.findById(textsWith);
       const textsWithDetails = {
         name: textsWithUser.name,
@@ -20,55 +29,27 @@ const loadTexts = async (userId, textsWith, page = 0) => {
       return { textsWithDetails };
     }
 
-    const aggregatedChat = await ChatModel.aggregate([
-      { $match: { user: new mongoose.Types.ObjectId(userId) } },
-      {
-        $project: {
-          chat: {
-            $filter: {
-              input: "$chats",
-              as: "chat",
-              cond: {
-                $eq: ["$$chat.textsWith", new mongoose.Types.ObjectId(textsWith)],
-              },
-            },
-          },
-        },
-      },
-      { $unwind: "$chat" },
-      {
-        $project: {
-          textsWith: "$chat.textsWith",
-          texts: {
-            $slice: [
-              "$chat.texts",
-              -((page + 1) * 10),
-              {
-                $cond: {
-                  if: { $lt: [{ $size: "$chat.texts" }, page * 10] },
-                  then: 0,
-                  else: {
-                    $cond: {
-                      if: { $lt: [{ $size: "$chat.texts" }, (page + 1) * 10] },
-                      then: { $subtract: [{ $size: "$chat.texts" }, page * 10] },
-                      else: 10,
-                    },
-                  },
-                },
-              },
-            ],
-          },
-        },
-      },
-    ]);
+    // Fetch Messages
+    // We want the LATEST messages (Date Descending), offset by page.
+    const messages = await MessageModel.find({
+      conversationId: conversation._id,
+    })
+      .sort({ date: -1 })
+      .skip(page * 10)
+      .limit(11); // Fetch 11 to check if hasMore
 
-    const chatData = aggregatedChat[0];
+    const hasMore = messages.length > 10;
+    const texts = messages.slice(0, 10).reverse(); // Reverse to get chronological order (Old -> New)
 
-    const talkingTo = await UserModel.findById(chatData.textsWith);
+    const talkingTo = await UserModel.findById(textsWith);
 
-    chatData.textsWith = talkingTo;
+    // Construct response to match previous shape expected by frontend "chat" object
+    const chatData = {
+      textsWith: talkingTo,
+      texts: texts,
+    };
 
-    return { chat: chatData };
+    return { chat: chatData, hasMore };
   } catch (error) {
     console.log(error);
     return { error };
@@ -96,51 +77,41 @@ const getUserInfo = async (userId) => {
 
 const sendText = async (userId, userToTextId, text) => {
   try {
-    const loggedInUser = await ChatModel.findOne({ user: userId });
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const partnerObjectId = new mongoose.Types.ObjectId(userToTextId);
 
-    const textToSendUser = await ChatModel.findOne({ user: userToTextId });
+    // Find or Create Conversation
+    let conversation = await ConversationModel.findOne({
+      users: { $all: [userObjectId, partnerObjectId] }
+    });
 
-    const newText = {
+    if (!conversation) {
+      conversation = await new ConversationModel({
+        users: [userObjectId, partnerObjectId],
+        lastMessage: {
+          text,
+          sender: userId,
+          date: Date.now()
+        }
+      }).save();
+    } else {
+      conversation.lastMessage = {
+        text,
+        sender: userId,
+        date: Date.now()
+      };
+      await conversation.save();
+    }
+
+    const newMessage = await new MessageModel({
+      conversationId: conversation._id,
       sender: userId,
       receiver: userToTextId,
       text,
-      date: Date.now(),
-    };
+      date: Date.now()
+    }).save();
 
-    //--SENDER--
-    const previousChat =
-      loggedInUser.chats.length > 0 &&
-      loggedInUser.chats.find(
-        (chat) => chat.textsWith.toString() === userToTextId
-      );
-
-    if (previousChat) {
-      previousChat.texts.push(newText);
-    } else {
-      const newChat = {
-        textsWith: userToTextId,
-        texts: [newText],
-      };
-
-      loggedInUser.chats.unshift(newChat);
-    }
-    await loggedInUser.save();
-    //--RECEIVER
-    const lastChat =
-      textToSendUser.chats.length > 0 &&
-      textToSendUser.chats.find((chat) => chat.textsWith.toString() === userId);
-    if (lastChat) {
-      lastChat.texts.push(newText);
-    } else {
-      const newChat = {
-        textsWith: userId,
-        texts: [newText],
-      };
-
-      textToSendUser.chats.unshift(newChat);
-    }
-    await textToSendUser.save();
-    return { newText };
+    return { newText: newMessage };
   } catch (error) {
     console.log(error);
     return { error };

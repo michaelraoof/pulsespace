@@ -15,6 +15,7 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import cookie from "js-cookie";
 import { Facebook } from "react-content-loader";
 import useBearStore from "store/store";
+import Loader from "react-loader-spinner";
 
 function ChatsPage() {
   const [errorLoading, setErrorLoading] = useState(false);
@@ -118,9 +119,12 @@ function ChatsPage() {
   }, [texts, page]);
 
 
+  const [loading, setLoading] = useState(false);
+
   //LOAD TEXTS useEffect
   useEffect(() => {
     const loadTexts = () => {
+      setLoading(true);
       socket.current.emit("loadTexts", {
         userId: user._id,
         textsWith: searchParams.get("chat"),
@@ -128,6 +132,7 @@ function ChatsPage() {
       });
 
       socket.current.on("textsLoaded", ({ chat, textsWithDetails }) => {
+        setLoading(false);
         if (textsWithDetails) {
           setTexts([]);
           setChatUserData({
@@ -433,7 +438,11 @@ function ChatsPage() {
                     }}
                   >
                     <>
-                      {/* Loading Indicator for Infinite Scroll can optionally be added here if needed */}
+                      {loading && (
+                        <div className="flex justify-center p-2">
+                          <Loader type="Oval" color="#9333ea" height={30} width={30} />
+                        </div>
+                      )}
                       {texts.length > 0 ? (
                         texts.map((text, i) => (
                           <Chat
