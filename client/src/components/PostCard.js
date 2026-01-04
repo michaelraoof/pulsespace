@@ -8,6 +8,8 @@ import {
   ShareIcon,
   ThumbUpIcon as ThumbUpOutlineIcon,
   PencilIcon,
+  DotsHorizontalIcon,
+  TrashIcon,
 } from "@heroicons/react/outline";
 import { deletePost, likePost, postComment, updatePost } from "utils/postActions";
 import CommentComponent from "./CommentComponent";
@@ -16,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import ReusableDialog from "./ReusableDialog";
 import toast, { Toaster } from "react-hot-toast";
 import { baseUrlFE } from "utils/baseUrl";
+import { useClickAway } from "react-use";
 
 const notify = () =>
   toast.success("Post deleted successfully!", {
@@ -47,6 +50,12 @@ function PostCard({ post, user, setPosts, postById }) {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(post.text);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  useClickAway(menuRef, () => {
+    setShowMenu(false);
+  });
 
   const createComment = async (e) => {
     e.preventDefault();
@@ -127,28 +136,46 @@ function PostCard({ post, user, setPosts, postById }) {
             handleDisagree={handleDisagree}
           />
           {post.user._id === user._id && !postById && (
-            <div className="flex items-center absolute top-0 right-2 space-x-2">
+            <div className="absolute right-4 top-2">
               <ThreeDotsDiv
-                onClick={() => setIsEditing((prev) => !prev)}
-                className="flex justify-center items-center"
+                onClick={() => setShowMenu((prev) => !prev)}
+                className="flex justify-center items-center transition duration-200 ease-out hover:bg-gray-100 hover:shadow-sm"
               >
-                <PencilIcon
+                <DotsHorizontalIcon
                   style={{ height: "1.2rem", width: "1.2rem" }}
                   className="text-gray-500"
                 />
               </ThreeDotsDiv>
 
-              <ThreeDotsDiv
-                onClick={() => {
-                  handleClickOpen();
-                }}
-                className="flex justify-center items-center"
-              >
-                <MinusCircleIcon
-                  style={{ height: "1.2rem", width: "1.2rem" }}
-                  className="text-gray-500"
-                />
-              </ThreeDotsDiv>
+              {showMenu && (
+                <div
+                  ref={menuRef}
+                  className="absolute right-0 top-8 w-40 bg-white rounded-lg shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] border border-gray-100 z-50 overflow-hidden transform origin-top-right transition-all animate-in fade-in zoom-in-95 duration-100"
+                >
+                  <div className="py-1">
+                    <button
+                      onClick={() => {
+                        setIsEditing(true);
+                        setShowMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-2 transition-colors duration-150"
+                    >
+                      <PencilIcon className="h-4 w-4" />
+                      <span>Edit Post</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleClickOpen();
+                        setShowMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 flex items-center space-x-2 transition-colors duration-150"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                      <span>Delete Post</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -366,13 +393,15 @@ const UserPTag = styled.p`
 `;
 
 const ThreeDotsDiv = styled.div`
-  height: 2.1rem;
-  width: 2.1rem;
+  height: 2.2rem;
+  width: 2.2rem;
   border-radius: 50%;
   cursor: pointer;
   padding: 0.1rem;
   font-size: 1.2rem;
+  transition: all 0.2s ease;
   :hover {
-    background-color: whitesmoke;
+    background-color: #f3f4f6;
+    transform: scale(1.05);
   }
 `;
