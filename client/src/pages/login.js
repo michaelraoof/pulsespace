@@ -74,6 +74,24 @@ function Login() {
           Soon...
         </Subheading>
         <div className="flex flex-col mt-5 bg-surface rounded-card shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),0_6.7px_5.3px_rgba(0,0,0,0.048),0_12.5px_10px_rgba(0,0,0,0.06),0_22.3px_17.9px_rgba(0,0,0,0.072),0_41.8px_33.4px_rgba(0,0,0,0.086),0_100px_80px_rgba(0,0,0,0.12)] min-w-[24rem] max-w-[30.5rem] w-[90%] h-[29.25rem] lg:w-[30.5rem] sm:min-w-auto sm:w-[95%]">
+          <div className="flex justify-center mb-4 px-8 mt-4">
+            <button
+              type="button"
+              onClick={() =>
+                setUser({
+                  email: "raoofmichael@yahoo.com",
+                  password: "123456",
+                })
+              }
+              className="w-full py-2 rounded-md bg-blue-50 text-blue-600 text-sm font-medium hover:bg-blue-100 transition-colors flex flex-col items-center gap-0.5 border border-blue-200"
+            >
+              <span>Tap to use Demo Account</span>
+              <span className="text-xs text-blue-400 font-normal">
+                (raoofmichael@yahoo.com)
+              </span>
+            </button>
+          </div>
+
           <Input
             placeholder="Enter Email"
             name="email"
