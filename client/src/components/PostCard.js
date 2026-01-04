@@ -7,8 +7,9 @@ import {
   MinusCircleIcon,
   ShareIcon,
   ThumbUpIcon as ThumbUpOutlineIcon,
+  PencilIcon,
 } from "@heroicons/react/outline";
-import { deletePost, likePost, postComment } from "utils/postActions";
+import { deletePost, likePost, postComment, updatePost } from "utils/postActions";
 import CommentComponent from "./CommentComponent";
 import { TextareaAutosize } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +19,11 @@ import { baseUrlFE } from "utils/baseUrl";
 
 const notify = () =>
   toast.success("Post deleted successfully!", {
+    position: "bottom-center",
+  });
+
+const notifyUpdate = () =>
+  toast.success("Post updated successfully!", {
     position: "bottom-center",
   });
 
@@ -39,6 +45,8 @@ function PostCard({ post, user, setPosts, postById }) {
   const [loading, setLoading] = useState(false);
   const buttonRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState(post.text);
 
   const createComment = async (e) => {
     e.preventDefault();
@@ -75,6 +83,11 @@ function PostCard({ post, user, setPosts, postById }) {
   const handleDisagree = () => {
     console.log("I do not agree.");
     handleClose();
+  };
+
+  const handleUpdate = async () => {
+    await updatePost(post._id, editedText, setPosts, notifyUpdate);
+    setIsEditing(false);
   };
 
   return (
@@ -114,20 +127,58 @@ function PostCard({ post, user, setPosts, postById }) {
             handleDisagree={handleDisagree}
           />
           {post.user._id === user._id && !postById && (
-            <ThreeDotsDiv
-              onClick={() => {
-                handleClickOpen();
-              }}
-              className="flex justify-center items-center absolute top-0 right-2"
-            >
-              <MinusCircleIcon
-                style={{ height: "1.2rem", width: "1.2rem" }}
-                className="text-gray-500"
-              />
-            </ThreeDotsDiv>
+            <div className="flex items-center absolute top-0 right-2 space-x-2">
+              <ThreeDotsDiv
+                onClick={() => setIsEditing((prev) => !prev)}
+                className="flex justify-center items-center"
+              >
+                <PencilIcon
+                  style={{ height: "1.2rem", width: "1.2rem" }}
+                  className="text-gray-500"
+                />
+              </ThreeDotsDiv>
+
+              <ThreeDotsDiv
+                onClick={() => {
+                  handleClickOpen();
+                }}
+                className="flex justify-center items-center"
+              >
+                <MinusCircleIcon
+                  style={{ height: "1.2rem", width: "1.2rem" }}
+                  className="text-gray-500"
+                />
+              </ThreeDotsDiv>
+            </div>
           )}
         </div>
-        <p className="ml-2 mt-5">{post.text}</p>
+
+        {isEditing ? (
+          <div className="ml-2 mt-5">
+            <TextareaAutosize
+              value={editedText}
+              onChange={(e) => setEditedText(e.target.value)}
+              minRows={2}
+              className="w-full border border-gray-200 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+            />
+            <div className="flex justify-end space-x-2 mt-2">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="px-3 py-1 text-sm bg-primary text-white rounded-md hover:bg-primary-hover"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="ml-2 mt-5">{post.text}</p>
+        )}
       </div>
 
       {post.picUrl && <PostImage src={post.picUrl} />}

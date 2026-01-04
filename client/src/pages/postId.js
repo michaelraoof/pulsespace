@@ -59,6 +59,7 @@ function PostPageById() {
                 post={post}
                 user={user}
                 postById={true}
+                setPosts={setPost}
               />
             </div>
           </div>

@@ -53,6 +53,26 @@ export const deletePost = async (postId, setPosts, notify) => {
   }
 };
 
+export const updatePost = async (postId, text, setPosts, notify) => {
+  try {
+    const res = await Axios.put(`/${postId}`, { text });
+
+    // Update the local state
+    setPosts((prev) => {
+      if (Array.isArray(prev)) {
+        return prev.map((post) =>
+          post._id === postId ? { ...post, text } : post
+        );
+      } else {
+        return { ...prev, text };
+      }
+    });
+    notify();
+  } catch (error) {
+    alert(catchErrors(error));
+  }
+};
+
 export const likePost = async (postId, userId, setLikes, like = true) => {
   try {
     if (like) {
