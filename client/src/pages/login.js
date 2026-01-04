@@ -55,7 +55,7 @@ function Login() {
 
   return (
     <>
-      <div className="pt-24 flex flex-col items-center min-h-screen bg-surface-background overflow-x-hidden sm:pt-6">
+      <div className="pt-10 pb-10 flex flex-col items-center min-h-screen bg-surface-background overflow-x-hidden overflow-y-auto sm:pt-6">
         <h1
           style={{
             fontSize: "2.8rem",
@@ -73,7 +73,7 @@ function Login() {
           Full Social Media Features Available | End-to-End Encryption Coming
           Soon...
         </Subheading>
-        <div className="flex flex-col mt-5 bg-surface rounded-card shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),0_6.7px_5.3px_rgba(0,0,0,0.048),0_12.5px_10px_rgba(0,0,0,0.06),0_22.3px_17.9px_rgba(0,0,0,0.072),0_41.8px_33.4px_rgba(0,0,0,0.086),0_100px_80px_rgba(0,0,0,0.12)] min-w-[24rem] max-w-[30.5rem] w-[90%] h-[29.25rem] lg:w-[30.5rem] sm:min-w-auto sm:w-[95%]">
+        <div className="flex flex-col mt-5 bg-surface rounded-card shadow-[0_2.8px_2.2px_rgba(0,0,0,0.034),0_6.7px_5.3px_rgba(0,0,0,0.048),0_12.5px_10px_rgba(0,0,0,0.06),0_22.3px_17.9px_rgba(0,0,0,0.072),0_41.8px_33.4px_rgba(0,0,0,0.086),0_100px_80px_rgba(0,0,0,0.12)] min-w-[20rem] max-w-[30.5rem] w-[90%] h-auto pb-8 lg:w-[30.5rem] sm:min-w-auto sm:w-[95%]">
           <div className="flex justify-center mb-4 px-8 mt-4">
             <button
               type="button"
