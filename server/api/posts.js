@@ -22,7 +22,6 @@ router.post("/", authMiddleware, async (req, res) => {
 
   try {
     const newPost = {
-      //req.userId is from our authMiddleware
       user: req.userId,
       text,
     };
@@ -50,7 +49,7 @@ router.get("/", authMiddleware, async (req, res) => {
 
   try {
     const { userId } = req;
-    const loggedUser = await FollowerModel.findOne({ user: userId }); //-followers as we only need the following from the followerModel
+    const loggedUser = await FollowerModel.findOne({ user: userId });
     let posts = [];
 
     if (number === 1) {
@@ -63,15 +62,10 @@ router.get("/", authMiddleware, async (req, res) => {
             ],
           },
         })
-          .limit(size) //limit is used to limit the posts fetched to size(i.e. we defined as 8 above)
-          .sort({ createdAt: -1 }) //-1 is for descending order, i.e. newest first
+          .limit(size)
+          .sort({ createdAt: -1 })
           .populate("user")
           .populate("comments.user");
-        //$in operator is a MongoDB operator, and it needs an array to compare the values, and $in needs atleast two values to work
-        //this means find all posts in postModel with user = userId
-        //since map returns an array, we spread the values using the spread operator
-        //we can say .populate('user') and that'll fill the user field in the response with all the details of Jane from UserModel
-        //without populate, we'd get user: <<userIdFromUserModel>>. With populate, we get the whole user
       }
 
       //IF user is not following anyone
@@ -83,8 +77,7 @@ router.get("/", authMiddleware, async (req, res) => {
           .populate("comments.user");
       }
     } else {
-      //to skip over the posts that were sent earlier
-      const skips = size * (number - 1); //say pageNum is 3. so, we'll have to skip 8 * (3-1) or 8*2 posts, bc 16 posts have already been fetched for 1st and 2nd pages in total
+      const skips = size * (number - 1);
       if (loggedUser.following.length > 0) {
         posts = await PostModel.find({
           user: {
@@ -138,7 +131,7 @@ router.get("/:postId", authMiddleware, async (req, res) => {
 //DELETE POST by ID
 router.delete("/:postId", authMiddleware, async (req, res) => {
   try {
-    const { userId } = req; //got this from authMiddleware
+    const { userId } = req;
     const { postId } = req.params;
     const post = await PostModel.findById(postId);
     if (!post) {
@@ -176,23 +169,61 @@ router.post("/like/:postId", authMiddleware, async (req, res) => {
     }
 
     const isLiked =
-      post.likes.filter((like) => like.user.toString() === userId).length > 0; //filter returns a new array with all the elements that pass the test
+      post.likes.filter((like) => like.user.toString() === userId).length > 0;
 
     if (isLiked) {
       return res.status(401).send("Post already liked");
     }
 
-    await post.likes.unshift({ user: userId }); //adds new items to the beginning of the original array and returns the new length
-    //we used an object inside of unshift bc in PostModel we have defined an object inside of likesArray
+    await post.likes.unshift({ user: userId });
     await post.save();
 
-    //check if post that's being liked was made by logged in user
-    //otherwise SEND NOTIFICATION
     if (post.user.toString() !== userId) {
       await newLikeNotification(userId, postId, post.user.toString());
     }
 
     return res.status(200).send("Post liked");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Server error");
+  }
+});
+
+//UPDATE POST by ID
+router.put("/:postId", authMiddleware, async (req, res) => {
+  try {
+    const { userId } = req;
+    const { postId } = req.params;
+    const { text } = req.body;
+
+    if (!text || text.length < 1) {
+      return res.status(400).send("Text is required");
+    }
+
+    const post = await PostModel.findById(postId);
+    if (!post) {
+      return res.status(404).send("Post not found");
+    }
+
+    const user = await UserModel.findById(userId);
+
+    //if some user other than logged in user tries to update a post
+    if (post.user.toString() !== userId) {
+      if (user.role === "root") {
+      } else {
+        return res.status(401).send("Unauthorized");
+      }
+    }
+
+
+    if (post.user.toString() !== userId && user.role !== "root") {
+      return res.status(401).send("Unauthorized");
+    }
+
+    post.text = text;
+    await post.save();
+
+    return res.status(200).send("Post updated successfully");
   } catch (error) {
     console.log(error);
     return res.status(500).send("Server error");
@@ -216,11 +247,11 @@ router.put("/unlike/:postId", authMiddleware, async (req, res) => {
     if (isLikedIndex === -1) {
       return res.status(400).send("Can't unlike a post that hasn't been liked");
     } else {
-      await post.likes.splice(isLikedIndex, 1); //delete that element
+      await post.likes.splice(isLikedIndex, 1);
 
       await post.save();
 
-      //check if post that's being disliked was made by logged in user and it's being disliked by logged in user
+      await post.save();
       //otherwise SEND NOTIFICATION
       if (post.user.toString() !== userId) {
         await removeLikeNotification(userId, postId, post.user.toString());
@@ -238,7 +269,7 @@ router.get("/like/:postId", authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params;
 
-    const post = await PostModel.findById(postId).populate("likes.user"); //populate will replace the userID with the user Object(which has all the user details)
+    const post = await PostModel.findById(postId).populate("likes.user");
     if (!post) {
       return res.status(404).send("No Post found");
     }
@@ -306,7 +337,7 @@ router.delete("/:postId/:commentId", authMiddleware, async (req, res) => {
 
     const commentIndex = post.comments.findIndex(
       (comment) => comment._id === commentId
-    ); //we didn't do toString() here bc comment._id is declared as String in the PostModel
+    );
 
     if (commentIndex === -1) {
       return res.status(404).send("Comment not found");
@@ -315,7 +346,6 @@ router.delete("/:postId/:commentId", authMiddleware, async (req, res) => {
     const user = await UserModel.findById(userId);
 
     const comment = post.comments[commentIndex];
-    //if comment is made by someone other than the logged in user, i.e. this user doesn't have permission to delete this comment
     if (comment.user.toString() !== userId) {
       if (user.role === "root") {
         await post.comments.splice(commentIndex, 1);
